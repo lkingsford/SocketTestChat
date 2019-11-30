@@ -5,7 +5,7 @@ using System.Linq;
 using LiteNetLib;
 using LiteNetLib.Utils;
 
-namespace sockcommon
+namespace SockCommon
 {
     public abstract class Message
     {
@@ -37,13 +37,14 @@ namespace sockcommon
             }
         }
 
-        public static Message Deserialize(NetDataReader reader)
+        public static Message Deserialize(NetDataReader reader, NetPeer sender)
         {
             // Get type
             var typeHash= reader.GetInt();
             var newType = MessageTypes[typeHash];
             var messageBytes = reader.GetRemainingBytes();
             var message = (Message)System.Activator.CreateInstance(newType, messageBytes);
+            message.sender = sender;
             return message;
         }
 
@@ -54,5 +55,7 @@ namespace sockcommon
             writer.Put(this.GetType().FullName.GetHashCode());
             writer.Put(Serialize());
         }
+
+        public NetPeer sender;
     }
 }

@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server", "server\server.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client", "client\client.csproj", "{2A65195E-2D8E-445D-9BC3-87408622CB7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sockcommon", "sockcommon\sockcommon.csproj", "{39212692-886F-4559-8A88-B3043FC535DD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SockCommon", "SockCommon\SockCommon.csproj", "{39212692-886F-4559-8A88-B3043FC535DD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{A290DA71-DE99-41FD-A6F3-807BDB0112C2}"
 EndProject

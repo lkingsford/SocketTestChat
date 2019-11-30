@@ -1,7 +1,7 @@
 using LiteNetLib;
 using LiteNetLib.Utils;
 
-namespace sockcommon
+namespace SockCommon
 {
     public class ChatMessage : Message
     {

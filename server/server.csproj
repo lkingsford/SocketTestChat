@@ -7,10 +7,15 @@
 
   <ItemGroup>
     <PackageReference Include="litenetlib" Version="0.8.3.1" />
+    <PackageReference Include="nlog" Version="4.6.8" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.6.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\sockcommon\sockcommon.csproj" />
+    <ProjectReference Include="..\SockCommon\SockCommon.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="NLog.config" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
