@@ -19,5 +19,8 @@ namespace SockCommon
         {
             return base.ToString();
         }
+
+        public string Contents;
+        public string SenderName;
     }
 }

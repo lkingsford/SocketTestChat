@@ -16,19 +16,20 @@ namespace client
             client = new NetManager(listener);
         }
 
-        public void Start()
+        public void Init()
         {
             client.Start();
             client.Connect("localhost" /* host ip or name */, 9050 /* port */, "SomeConnectionKey" /* text key or NetDataWriter */);
             listener.NetworkReceiveEvent += NetworkReceiveEvent;
-
-            while (!Console.KeyAvailable)
-            {
-                client.PollEvents();
-                Thread.Sleep(15);
-            }
-
+        }
+        public void Stop()
+        {
             client.Stop();
+        }
+
+        public void Poll()
+        {
+            client.PollEvents();
         }
 
         internal void NetworkReceiveEvent(NetPeer sender,
@@ -39,9 +40,16 @@ namespace client
             switch(received)
             {
                 case ChatMessage message:
+                    messageWrite($"{message.SenderName}:   {message.Contents}");
+                    break;
+                case AdminMessage message:
+                    messageWrite($"Servers says: {message.ServerMessage}");
                     break;
             }
             dataReader.Recycle();
         }
+
+        public delegate void MessageWriteDelegate(string text);
+        public MessageWriteDelegate messageWrite = null;
     }
 }

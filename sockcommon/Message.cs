@@ -37,7 +37,8 @@ namespace SockCommon
             }
         }
 
-        public static Message Deserialize(NetDataReader reader, NetPeer sender)
+        public static Message Deserialize(NetDataReader reader,
+                                          NetPeer sender = null)
         {
             // Get type
             var typeHash= reader.GetInt();
@@ -61,7 +62,10 @@ namespace SockCommon
         /// This will be null otherwise.
         /// </summary>
         public NetPeer sender = null;
+    }
 
+    public static class MessageExtensions
+    {
         /// <summary>
         /// Send a message to a NetPeer
         /// </summary>
