@@ -1,11 +1,22 @@
-﻿namespace client
+﻿using Avalonia;
+
+namespace client
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args) => BuildAvaloniaApp().Start(AppMain, args);
+
+        // Avalonia configuration, don't remove; also used by visual designer.
+        public static AppBuilder BuildAvaloniaApp()
+            => AppBuilder.Configure<client.ui.App>().UsePlatformDetect();
+
+        // Your application's entry point. Here you can initialize your MVVM framework, DI
+        // container, etc.
+        private static void AppMain(Application app, string[] args)
         {
-            var client = new Client();
-            client.Start();
+            app.Run(new client.ui.MainWindow());
+            //var client = new Client();
+            //client.Start();
         }
     }
 }
