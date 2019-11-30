@@ -56,6 +56,20 @@ namespace SockCommon
             writer.Put(Serialize());
         }
 
-        public NetPeer sender;
+        /// <summary>
+        /// The sender, if this is received from a peer.
+        /// This will be null otherwise.
+        /// </summary>
+        public NetPeer sender = null;
+
+        /// <summary>
+        /// Send a message to a NetPeer
+        /// </summary>
+        /// <param name="peer">Peer to send to</param>
+        /// <param name="message">Message to send</param>
+        public static void Send(this NetPeer peer, Message message)
+        {
+            peer.Send(message.Serialize(), DeliveryMethod.ReliableOrdered);
+        }
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Collections.Generic;
-using System.Linq;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using SockCommon;
@@ -10,6 +9,8 @@ namespace server
 {
     public class Server
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         List<NetPeer> peers;
         NetManager server;
         EventBasedNetListener listener;
@@ -22,11 +23,13 @@ namespace server
 
         public void Start()
         {
-            server.Start(9050);
+            Logger.Debug("Assigning listeners");
             listener.PeerConnectedEvent +=  NewPeer;
             listener.ConnectionRequestEvent += AcceptRequest;
             listener.NetworkReceiveEvent += NetworkReceiveEvent;
 
+            Logger.Info("Starting server");
+            server.Start(9050);
             while (!Console.KeyAvailable)
             {
                 server.PollEvents();
@@ -38,18 +41,11 @@ namespace server
 
         internal void NewPeer(NetPeer peer)
         {
-            Console.WriteLine("We got connection: {0}", peer.EndPoint); // Show peer ip
-            NetDataWriter writer = new NetDataWriter();                 // Create writer class
-            writer.Put("Hello client!");                                // Put some string
-            peer.Send(writer, DeliveryMethod.ReliableOrdered);          // Send with reliability
+            Logger.Info("New connection from {ip}", peer.EndPoint);
+            NetDataWriter writer = new NetDataWriter();
             peers.Add(peer);
-            foreach (var i in peers)
-            {
-                NetDataWriter writer2 = new NetDataWriter();                 // Create writer class
-                writer2.Put("Our friends are " + String.Join(",", peers.Select(j=>j.EndPoint)));
-                i.Send(writer2, DeliveryMethod.ReliableOrdered);
-            }
         }
+
         internal void AcceptRequest(ConnectionRequest request)
         {
             {
@@ -73,6 +69,7 @@ namespace server
                 case ChatMessage message:
                     break;
             }
+            dataReader.Recycle();
         }
     }
 }

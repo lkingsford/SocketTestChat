@@ -6,11 +6,10 @@
 
         static void Main(string[] args)
         {
-            Logger.Info("Server Started");
+            Logger.Info("Socket Test Server Program Started");
 
             var server = new Server();
             server.Start();
         }
-
-}
+    }
 }
