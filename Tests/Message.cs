@@ -18,27 +18,31 @@ namespace Tests
         public static IEnumerable<TestCaseData> MessageTypes
         {
             get {
-                var messageClasses = new List<Type> {
-                    typeof(ChatMessage)
-                };
-                foreach (var yieldType in messageClasses)
-                {
-                    var tcd = new TestCaseData(yieldType);
-                    tcd.TestName = yieldType.FullName;
-                    yield return tcd;
-                }
+                var ChatMessage = new ChatMessage("Message");
+                var ChatTest = new TestCaseData(typeof(ChatMessage), ChatMessage);
+                ChatTest.TestName = "ChatMessage";
+                yield return ChatTest;
+
+                var AdminMessage = new AdminMessage("Message");
+                var AdminTest = new TestCaseData(typeof(AdminMessage), AdminMessage);
+                AdminTest.TestName = "AdminMessage";
+                yield return AdminTest;
+
+                var LoginMessage = new LoginMessage();
+                var LoginTest = new TestCaseData(typeof(LoginMessage), LoginMessage);
+                LoginTest.TestName = "LoginMessage";
+                yield return LoginTest;
             }
 
         }
 
         [TestCaseSource("MessageTypes")]
         [Test]
-        public void MessagesDeserializeToCorrectType(Type t)
+        public void MessagesDeserializeToCorrectType(Type t, Message message)
         {
             byte[] messageBytes = {};
-            var message = (Message)System.Activator.CreateInstance(t, messageBytes);
-            var writer = new NetDataWriter();
-            var reader = new NetDataReader(writer.Data);
+            var messageData = message.Serialize();
+            var reader = new NetDataReader(messageData);
             var deserialized = Message.Deserialize(reader);
             Assert.That(deserialized.GetType(), Is.EqualTo(t));
         }
