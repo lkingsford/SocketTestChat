@@ -10,6 +10,11 @@ namespace SockCommon
 
         }
 
+        public LoginMessage(string name)
+        {
+            Name = name;
+        }
+
         public LoginMessage(byte[] messageBytes)
         {
             var reader = new NetDataReader(messageBytes);

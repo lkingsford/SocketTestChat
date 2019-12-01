@@ -12,7 +12,7 @@ namespace server
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         List<NetPeer> peers = new List<NetPeer>();
-        List<LoggedInPeer> loggedInPeers = new List<LoggedInPeer>();
+        Dictionary<NetPeer, LoggedInPeer> loggedInPeers = new Dictionary<NetPeer, LoggedInPeer>();
 
         NetManager server;
         EventBasedNetListener listener;
@@ -43,7 +43,7 @@ namespace server
         {
             foreach (var peer in loggedInPeers)
             {
-                peer.Peer.Send(message);
+                peer.Value.Peer.Send(message);
             }
         }
 
@@ -62,8 +62,8 @@ namespace server
             peers.Remove(peer);
             if (LoggedIn(peer))
             {
-                SendToAllLoggedInPeers(new AdminMessage($"{GetUser(peer).Username} has left ({info.Reason.ToString()})"));
-                loggedInPeers.RemoveAll((i)=>i.Peer==peer);
+                SendToAllLoggedInPeers(new AdminMessage($"{loggedInPeers[peer].Username} has left ({info.Reason.ToString()})"));
+                loggedInPeers.Remove(peer);
             }
         }
 
@@ -79,12 +79,7 @@ namespace server
 
         private bool LoggedIn(NetPeer peer)
         {
-            return loggedInPeers.Any((i)=>i.Peer == peer);
-        }
-
-        private LoggedInPeer GetUser(NetPeer peer)
-        {
-            return loggedInPeers.First((i)=>i.Peer==peer);
+            return loggedInPeers.ContainsKey(peer);
         }
 
         private void SendNotLoggedIn(NetPeer peer)
@@ -94,11 +89,24 @@ namespace server
 
         private void LogIn(NetPeer peer, string name)
         {
-            SendToAllLoggedInPeers(new AdminMessage($"{name} has joined"));
             var user = new LoggedInPeer();
+            if (loggedInPeers.Any((i)=>i.Value.Username.ToLowerInvariant() == name.ToLowerInvariant()))
+            {
+                Logger.Info("{endpoint} attempted to use username {name} which is already in use", peer.EndPoint, name);
+                peer.Send(new AdminMessage($"Username {name} is already in use", AdminMessageType.Error));
+                return;
+            }
+            if (loggedInPeers.ContainsKey(peer))
+            {
+                Logger.Info("{endpoint} ({name}) attempted to log in when already logged in", peer.EndPoint, name);
+                peer.Send(new AdminMessage("You are already logged in", AdminMessageType.Error));
+                return;
+            }
             user.Username = name;
             user.Peer = peer;
-            loggedInPeers.Add(user);
+            loggedInPeers.Add(peer, user);
+            SendToAllLoggedInPeers(new AdminMessage($"{name} has joined"));
+            Logger.Info("{endpoint} has logged in as {name}", peer.EndPoint, name);
         }
 
         private void NetworkReceiveEvent(NetPeer sender,
@@ -116,7 +124,7 @@ namespace server
                     if (LoggedIn(sender))
                     {
                         Logger.Info("{sender}: {message}", sender.EndPoint.ToString(), message.Contents);
-                        SendToAllLoggedInPeers(new ChatMessage(message.Contents, sender.EndPoint.ToString()));
+                        SendToAllLoggedInPeers(new ChatMessage(message.Contents, loggedInPeers[sender].Username));
                     }
                     else
                     {

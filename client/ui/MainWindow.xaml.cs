@@ -44,7 +44,14 @@ namespace client.ui
         internal void SendMessage()
         {
             var textToSend = MessageToSend.Text.TrimEnd('\n', '\r');
-            activeClient.SendChatMessage(textToSend);
+            if (textToSend.Length > 0 && textToSend[0] == '\\')
+            {
+                activeClient.ProcessCommand(textToSend);
+            }
+            else
+            {
+                activeClient.SendChatMessage(textToSend);
+            }
             MessageToSend.Text = "";
         }
 
@@ -71,6 +78,7 @@ namespace client.ui
         public void AddMessage(string text)
         {
             Messages.Text += ($"{text}\n");
+            Messages.CaretIndex = Messages.Text.Length - 1;
         }
     }
 }

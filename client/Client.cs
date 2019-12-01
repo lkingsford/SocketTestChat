@@ -44,15 +44,59 @@ namespace client
                     break;
                 case AdminMessage message:
                     messageWrite($"Servers says: {message.ServerMessage}");
+                    ProcessAdminMessage(message);
                     break;
             }
             dataReader.Recycle();
+        }
+
+        internal void ProcessAdminMessage(AdminMessage message)
+        {
+            switch (message.MessageType)
+            {
+                case AdminMessageType.NotLoggedIn:
+                    messageWrite("Log in with \\login <name>");
+                    break;
+                default:
+                    break;
+            }
         }
 
         internal void SendChatMessage(string message)
         {
             var messageToSend = new ChatMessage(message);
             client.FirstPeer.Send(messageToSend);
+        }
+
+        internal void ProcessCommand(string command)
+        {
+            var sanitizedCommand = command;
+            if (sanitizedCommand[0] == '\\')
+            {
+                sanitizedCommand = sanitizedCommand.TrimStart('\\');
+            }
+            var args = sanitizedCommand.Split(' ');
+            if (args.Length == 0)
+            {
+                messageWrite("Invalid command");
+                return;
+            }
+            switch (args[0].ToLowerInvariant())
+            {
+                case "login":
+                    if (args.Length > 1)
+                    {
+                        client.FirstPeer.Send(new LoginMessage(args[1]));
+                    }
+                    else
+                    {
+                        messageWrite("Must provide name");
+                    }
+                    break;
+                default:
+                    messageWrite("Unknown command");
+                    break;
+            }
         }
 
         public delegate void MessageWriteDelegate(string text);
