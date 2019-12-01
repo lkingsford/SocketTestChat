@@ -15,8 +15,6 @@ namespace client
         private static void AppMain(Application app, string[] args)
         {
             app.Run(new client.ui.MainWindow());
-            //var client = new Client();
-            //client.Start();
         }
     }
 }
