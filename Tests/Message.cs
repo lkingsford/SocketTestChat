@@ -38,7 +38,6 @@ namespace Tests
             byte[] messageBytes = {};
             var message = (Message)System.Activator.CreateInstance(t, messageBytes);
             var writer = new NetDataWriter();
-            message.PutToWriter(writer);
             var reader = new NetDataReader(writer.Data);
             var deserialized = Message.Deserialize(reader);
             Assert.That(deserialized.GetType(), Is.EqualTo(t));

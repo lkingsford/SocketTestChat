@@ -10,7 +10,7 @@ namespace SockCommon
 
         }
 
-        public override byte[] Serialize()
+        internal override byte[] SerializeSpecific()
         {
             return new byte[] {};
         }

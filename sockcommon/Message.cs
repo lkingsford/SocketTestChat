@@ -9,9 +9,25 @@ namespace SockCommon
 {
     public abstract class Message
     {
-        private static Dictionary<int, Type> _messageTypes;
+        private static ulong GetIdHash(Type typeToHash)
+        {
+            //Lazily stolen from https://stackoverflow.com/questions/9545619/a-fast-hash-function-for-string-in-c-sharp
+            //(A Knuth Hash)
+            UInt64 hashedValue = 3074457345618258791ul;
+            var read = typeToHash.FullName;
+            for(int i=0; i<read.Length; i++)
+            {
+                hashedValue += read[i];
+                hashedValue *= 3074457345618258799ul;
+            }
+            return hashedValue;
+        }
 
-        private static Dictionary<int, Type> MessageTypes
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
+        private static Dictionary<ulong, Type> _messageTypes;
+
+        private static Dictionary<ulong, Type> MessageTypes
         {
             get
             {
@@ -21,7 +37,7 @@ namespace SockCommon
                 }
                 else
                 {
-                    _messageTypes = new Dictionary<int, Type>();
+                    _messageTypes = new Dictionary<ulong, Type>();
                     // Init message types with reflection
                     // Stolen from https://stackoverflow.com/questions/857705/get-all-derived-types-of-a-type
                     var messageClasses = (from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
@@ -30,7 +46,7 @@ namespace SockCommon
                                           select assemblyType).ToArray();
                     foreach (var m in messageClasses)
                     {
-                        _messageTypes.Add(m.FullName.GetHashCode(), m);
+                        _messageTypes.Add(GetIdHash(m), m);
                     }
                     return _messageTypes;
                 }
@@ -41,7 +57,7 @@ namespace SockCommon
                                           NetPeer sender = null)
         {
             // Get type
-            var typeHash= reader.GetInt();
+            var typeHash = reader.GetULong();
             var newType = MessageTypes[typeHash];
             var messageBytes = reader.GetRemainingBytes();
             var message = (Message)System.Activator.CreateInstance(newType, messageBytes);
@@ -49,12 +65,15 @@ namespace SockCommon
             return message;
         }
 
-        public abstract byte[] Serialize();
+        internal abstract byte[] SerializeSpecific();
 
-        public void PutToWriter(NetDataWriter writer)
+        public byte[] Serialize()
         {
-            writer.Put(this.GetType().FullName.GetHashCode());
-            writer.Put(Serialize());
+            var writer = new NetDataWriter();
+            var hash = GetIdHash(this.GetType());
+            writer.Put(hash);
+            writer.Put(SerializeSpecific());
+            return writer.Data;
         }
 
         /// <summary>
@@ -66,6 +85,8 @@ namespace SockCommon
 
     public static class MessageExtensions
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// Send a message to a NetPeer
         /// </summary>
@@ -73,7 +94,9 @@ namespace SockCommon
         /// <param name="message">Message to send</param>
         public static void Send(this NetPeer peer, Message message)
         {
-            peer.Send(message.Serialize(), DeliveryMethod.ReliableOrdered);
+            var messageToSend = message.Serialize();
+            Logger.Debug($"Sending {messageToSend} to {peer.EndPoint}");
+            peer.Send(messageToSend, DeliveryMethod.ReliableOrdered);
         }
     }
 }

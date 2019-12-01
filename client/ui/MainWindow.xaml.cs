@@ -10,7 +10,6 @@ namespace client.ui
 {
     public class MainWindow : Window
     {
-        internal DispatcherTimer networkPoller;
         client.Client activeClient;
         public MainWindow()
         {
@@ -18,7 +17,6 @@ namespace client.ui
 #if DEBUG
             this.AttachDevTools();
 #endif
-            activeClient = new client.Client();
         }
 
         Button SendButton;
@@ -34,27 +32,25 @@ namespace client.ui
 
             SendButton.Click += SendButton_Click;
 
+            activeClient = new client.Client();
             activeClient.Init();
             activeClient.messageWrite = AddMessage;
 
-            networkPoller = new DispatcherTimer();
-            networkPoller.Interval = System.TimeSpan.FromMilliseconds(15);
-            networkPoller.Tick += new EventHandler(PollNetwork);
-            networkPoller.Start();
+            DispatcherTimer.Run(PollNetwork, TimeSpan.FromMilliseconds(50), DispatcherPriority.Normal);
         }
         internal void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            Messages.Text += "\n Sent button clicked";
         }
 
-        internal void PollNetwork(object sender, EventArgs e)
+        internal bool PollNetwork()
         {
             activeClient.Poll();
+            return true;
         }
 
         public void AddMessage(string text)
         {
-            Messages.Text += ("{}" + text);
+            Messages.Text += ($"{text}\n");
         }
     }
 }

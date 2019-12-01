@@ -18,7 +18,7 @@ namespace SockCommon
 
         public string Name;
 
-        public override byte[] Serialize()
+        internal override byte[] SerializeSpecific()
         {
             var writer = new NetDataWriter();
             writer.Put(Name);

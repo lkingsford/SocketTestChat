@@ -5,9 +5,9 @@ namespace SockCommon
 {
     public class AdminMessage : Message
     {
-        public AdminMessage()
+        public AdminMessage(string message)
         {
-
+            ServerMessage = message;
         }
 
         public AdminMessage(byte[] messageBytes)
@@ -18,7 +18,7 @@ namespace SockCommon
 
         public string ServerMessage;
 
-        public override byte[] Serialize()
+        internal override byte[] SerializeSpecific()
         {
             var writer = new NetDataWriter();
             writer.Put(ServerMessage);

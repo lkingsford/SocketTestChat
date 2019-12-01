@@ -30,7 +30,7 @@ namespace server
 
             Logger.Info("Starting server");
             server.Start(9050);
-            while (!Console.KeyAvailable)
+            while (true)
             {
                 server.PollEvents();
                 Thread.Sleep(15);
@@ -38,12 +38,20 @@ namespace server
             server.Stop();
         }
 
+        internal void SendToAllPeers(Message message)
+        {
+            foreach (var peer in peers)
+            {
+                peer.Send(message);
+            }
+        }
 
         internal void NewPeer(NetPeer peer)
         {
             Logger.Info("New connection from {ip}", peer.EndPoint);
             NetDataWriter writer = new NetDataWriter();
             peers.Add(peer);
+            SendToAllPeers(new AdminMessage($"{peer.EndPoint} has joined"));
         }
 
         internal void AcceptRequest(ConnectionRequest request)
