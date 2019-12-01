@@ -18,8 +18,8 @@ Once installed:
 - Run the server for debugging with `dotnet run --project server`
 - Run the client for debugging with `dotnet run --project client`
 - Run the unit tests with `dotnet test`
-- Publish the client for Windows with `dotnet publish --project client -c Release -r win10-x64 -o Client-Win64`
-- Publish the server for Linux with `dotnet publish --project server -c Release -r linux-x64 -o Server-Linux`
+- Publish the client for Windows with `dotnet publish client -c Release -r win10-x64 -o Client-Win64`
+- Publish the server for Linux with `dotnet publish server -c Release -r linux-x64 -o Server-Linux`
 
 # Running
 
