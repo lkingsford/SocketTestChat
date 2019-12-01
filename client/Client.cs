@@ -49,6 +49,12 @@ namespace client
             dataReader.Recycle();
         }
 
+        internal void SendChatMessage(string message)
+        {
+            var messageToSend = new ChatMessage(message);
+            client.FirstPeer.Send(messageToSend);
+        }
+
         public delegate void MessageWriteDelegate(string text);
         public MessageWriteDelegate messageWrite = null;
     }

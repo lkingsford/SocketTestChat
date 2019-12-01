@@ -27,6 +27,7 @@ namespace server
             listener.PeerConnectedEvent +=  NewPeer;
             listener.ConnectionRequestEvent += AcceptRequest;
             listener.NetworkReceiveEvent += NetworkReceiveEvent;
+            listener.PeerDisconnectedEvent += LostPeer;
 
             Logger.Info("Starting server");
             server.Start(9050);
@@ -35,7 +36,6 @@ namespace server
                 server.PollEvents();
                 Thread.Sleep(15);
             }
-            server.Stop();
         }
 
         internal void SendToAllPeers(Message message)
@@ -52,6 +52,14 @@ namespace server
             NetDataWriter writer = new NetDataWriter();
             peers.Add(peer);
             SendToAllPeers(new AdminMessage($"{peer.EndPoint} has joined"));
+        }
+
+        internal void LostPeer(NetPeer peer, DisconnectInfo info)
+        {
+            Logger.Info("Lost connection from {ip} ({reason})", peer.EndPoint, info.Reason);
+            NetDataWriter writer = new NetDataWriter();
+            peers.Remove(peer);
+            SendToAllPeers(new AdminMessage($"{peer.EndPoint} has left ({info.Reason.ToString()})"));
         }
 
         internal void AcceptRequest(ConnectionRequest request)
@@ -75,6 +83,8 @@ namespace server
                     break;
 
                 case ChatMessage message:
+                    Logger.Info("{sender}: {message}", sender.EndPoint.ToString(), message.Contents);
+                    SendToAllPeers(new ChatMessage(message.Contents, sender.EndPoint.ToString()));
                     break;
             }
             dataReader.Recycle();
