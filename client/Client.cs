@@ -7,6 +7,8 @@ namespace client
 {
     class Client
     {
+        const string SERVER = "localhost";
+        const int PORT = 9050;
         EventBasedNetListener listener;
         NetManager client;
 
@@ -19,7 +21,7 @@ namespace client
         public void Init()
         {
             client.Start();
-            client.Connect("localhost" /* host ip or name */, 9050 /* port */, "SomeConnectionKey" /* text key or NetDataWriter */);
+            client.Connect(SERVER, PORT, "SomeConnectionKey");
             listener.NetworkReceiveEvent += NetworkReceiveEvent;
         }
         public void Stop()
